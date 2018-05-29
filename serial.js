@@ -5,38 +5,37 @@ var SerialPort = require("serialport")
 //   });
 // });
 
-function send(val)
-{
-	var val=Math.floor(Math.random()*255);
-	console.log(val)
-	serialport.write(Buffer(String(val)));
-}
-function run()
-{
-	port="COM3"
-	var serialport = new SerialPort(port,
-						{
+port="COM3"
+
+const Readline = SerialPort.parsers.Readline;
+const parser = new Readline();
+
+
+var serialport = new SerialPort(port,{
 							baudRate:9600
 						});
-	serialport.on('open', function(){
-	  console.log('Serial Port Opend');
-	  serialport.on('data', function(data){
-	    console.log(data.toString().trim());
-	  });
-	});
+
+function send(val)
+{
+	serialport.write(Buffer(String(val)));
 }
+
+
+function run()
+{
+	serialport.pipe(parser);
+	parser.on('data', console.log);
+	// serialport.on('open', function(){
+	// 	console.log('Serial Port Opend');
+	// 	serialport.on('data', function(data){
+	// 		console.log(data);
+	// 	});
+	// });
+}
+
+
 module.exports={
 	send:send,
-	run:run
+	run:run,
+	port:serialport
 }
-
-
-
-
-
-
-
-
-
-
-
