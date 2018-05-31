@@ -1,44 +1,46 @@
-var express=require("express");
+var express = require('express');
 var app=express();
-var io=require("socket.io")
-var serial=require("./serial");
-serial.run();
-
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
+var SerialPort = require("serialport")
+var bodyParser=require("body-parser");
 app.set("view engine","ejs");
 app.use(express.static(__dirname+"/public"));
-// app.set(bodyParser.urlencoded({extended:true}));
+app.set(bodyParser.urlencoded({extended:true}));
 
-app.get("/favicon.ico",function(req, res)
-	{
-		res.send("No Trouble");
-	});
+port="COM3"
 
-app.get("/status",function(req, res)
-	{
-		serial.send("S");
-		res.send(JSON.stringify({status:"OK"}));
-	});
+server.listen(80);
 
-app.get("/:val",function(req, res)
-	{
-		var v=req.params.val;
-		// console.log(v);
-		serial.send(v);
-		res.send(JSON.stringify({status:"OK",val:v}));
-	});
+const Readline = SerialPort.parsers.Readline;
+const parser = new Readline();
 
-app.get("/",function(req,res)
-	{
-		res.render("index");
-	});
+var serialport = new SerialPort(port,{
+							baudRate:9600
+						});
 
-var server=app.listen(8080,function()
+app.get('/', function (req, res) {
+  res.render('map.ejs');
+});
+app.get('/distance',function(req,res)
+{
+	res.send("still a work in progress");
+})
+
+serialport.pipe(parser);
+
+io.on('connection', function (socket) {
+	parser.on("data",function(data)
 	{
-		console.log("Server is also start");
+		socket.emit('news',data);
 	});
-var socketServer=io(server);
-// socketServer.on("connection",function(socket)
-// 	{
-// 		console.log("Client Connected!");
-// 		serial.port.on()
-// 	});
+  	
+  	socket.on('message', function (data) {
+    console.log(data);
+  });
+});
+
+serialport.on("open",function()
+	{
+		console.log("Serial port is a open")
+	});

@@ -1,12 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<title>Flight Controller</title>
-</head>
-<body>
-	<button class="plus">+</button>
-	<br>
-	<button class="minus">-</button>
-	<script type="text/javascript" src="/script.js"></script>
-</body>
-</html>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  var socket = io.connect('http://localhost');
+  socket.on('news', function (data) {
+    console.log(data);
+    socket.emit('my other event', { my: 'data' });
+  });
+</script>

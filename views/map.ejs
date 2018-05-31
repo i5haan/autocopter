@@ -6,58 +6,96 @@
          documentation:
          https://developers.google.com/maps/documentation/javascript/tutorial -->
     <link rel="stylesheet" href="https://developers.google.com/maps/documentation/javascript/demos/demos.css">
+    <link href="https://fonts.googleapis.com/css?family=Bowlby+One+SC" rel="stylesheet">
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      
+    </script>
+    <script type="text/javascript" src="client.js"></script>
     <style type="text/css">
     	div#map
     	{
-    		width:50%;
-    		margin:auto;
+    		width:40%;
+        margin: 50px;
     	}
+      div.Photo
+      {
+        width:70%;
+        margin: auto;
+      }
+      img
+      {
+        width:100%;
+        height:100%;
+      }
+      body
+      {
+        background:#3a3838;
+      }
+      .navbar
+      {
+        margin:auto;
+        width:100%;
+        height:100px;
+        background:#bada55;
+        color:white; 
+      }
+      .navbar-button
+      {
+        width:24.5%;
+        height:100%;
+        margin:0;
+        padding:0;
+        background:#bada55;
+        border:none;
+        font-size: 3em;
+        color:white;
+        font-family:Bowlby One SC ;
+        transition: 1.5s;
+      }
+      .navbar-button:hover
+      {
+        background:white;
+        color:black;
+      }
+      button
+      {
+        padding:0;
+        margin:0;
+      }
+      .hide
+      {
+        display:none;
+      }
+      .text{
+        margin:10px 50px;
+        color:white;
+      }
     </style>
   </head>
   <body>
-    <div id="map"></div>
+    <div class="navbar">
+        <button class="navbar-button" id="loc">Location</button>
+        <button class="navbar-button" id="abo">About</button>
+        <button class="navbar-button" id="sur">Surveilance</button>
+        <button class="navbar-button" id="team">Team</button>
+    </div>
+    <div class="location">
+      <div id="map"></div>
+      <h3 class="text">Lattitude</h3>
+      <input type="text" name="coordinates1" class="lat text">
+      <br>
+      <h3 class="text">Longitude</h3>
+      <input type="text" name="coordinates2" class="lon text">
+      <br>
+      <button class="compute text">Go</button>
+    </div>
     
-    <script>
-      function initMap() {
-        var chicago = {lat: 30.3526420, lng: 76.3704814};
-        var indianapolis = {lat: 30.3532994, lng: 76.3619734};
+    <div class="Photo hide">
+      <img src="http://192.168.43.1:8080/video">
+    </div>
 
-        var map = new google.maps.Map(document.getElementById('map'), {
-          center: chicago,
-          zoom: 10
-        });
-
-        var directionsDisplay = new google.maps.DirectionsRenderer({
-          map: map
-        });
-
-        // Set destination, origin and travel mode.
-        var request = {
-          destination: indianapolis,
-          origin: chicago,
-          travelMode: 'TRANSIT'
-        };
-
-        // Pass the directions request to the directions service.
-        var directionsService = new google.maps.DirectionsService();
-        directionsService.route(request, function(response, status) {
-          if (status == 'OK') {
-            // Display the route on the map.
-            directionsDisplay.setDirections(response);
-          }
-        });
-
-        var myLatLng = {lat: 30.3542934, lng: 76.3619734};
-
-
-		var marker = new google.maps.Marker({
-			position: myLatLng,
-		    map: map,
-		    title: 'Hello World!'
-		});
-      }
-
-    </script>
+    <script type="text/javascript" src="map.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDZikYlRBV20CA1XwXS_OVKUQPQnOc7siI&callback=initMap"
         async defer></script>
   </body>
