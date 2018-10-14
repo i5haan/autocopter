@@ -1,3 +1,79 @@
+var file_path = '/images/';
+function markSafe(url) {
+  console.log("hi")
+    // 1. create a new XMLHttpRequest object -- an object like any other!
+    var myRequest = new XMLHttpRequest();
+    console.log("hi")
+    // 2. open the request and pass the HTTP method name and the resource as parameters
+    myRequest.open('GET', url);
+    // 3. write a function that runs anytime the state of the AJAX request changes
+    myRequest.onreadystatechange = function () 
+    { 
+        // 4. check if the request has a readyState of 4, which indicates the server has responded (complete)
+        if (myRequest.readyState === 4) 
+        {
+            console.log(myRequest.statusCode)
+            var data = "";
+            // 5. insert the text sent by the server into the HTML of the 'ajax-content'
+            console.log(myRequest.responseText)
+            
+            
+        }
+    };
+    myRequest.send();
+}
+function allAlerts()
+  {
+    console.log("hi")
+    // 1. create a new XMLHttpRequest object -- an object like any other!
+    var myRequest = new XMLHttpRequest();
+    console.log("hi")
+    // 2. open the request and pass the HTTP method name and the resource as parameters
+    myRequest.open('GET', '/alerts/checked');
+    // 3. write a function that runs anytime the state of the AJAX request changes
+    myRequest.onreadystatechange = function () 
+    { 
+        // 4. check if the request has a readyState of 4, which indicates the server has responded (complete)
+        if (myRequest.readyState === 4) 
+        {
+            var data = "";
+            // 5. insert the text sent by the server into the HTML of the 'ajax-content'
+            var d = JSON.parse(myRequest.responseText);
+            console.log(d);
+            d.forEach(function (alert) {
+              var s = '<div class="col-md-3 col-sm-6" >' +
+              '<div class="thumbnail">' +
+                 '<img src="' + file_path + alert.file_name+'.jpg">' +
+                 '<div class="caption">' +
+                    'Latitude : ' + alert.lat + ' Longitude : ' + alert.lng +
+                 '</div>' +
+                 '<p>' +
+                 '<h4>' + alert.created + '</h4>' +
+                 '</p>' +
+                 '<p>' +
+                    '<button class="btn btn-primary mark" href="/mark/' + alert._id +'">Mark As Safe</button>' +
+                 '</p>' +
+              '</div>' +
+              '</div>';
+              data = data + s;
+              console.log(s)
+            });
+            var div = document.querySelector('.alerts');
+            div.innerHTML = data;
+            // console.log(data)
+            var b = document.querySelector("button.mark");
+
+
+            b.addEventListener("click", function() {
+              markSafe(this.getAttribute('href'));
+              allAlerts();
+            });
+            
+        }
+    };
+    myRequest.send();
+  };
+
 function makeRequest(p1,p2)
   {
     console.log("hi")
@@ -20,15 +96,10 @@ function makeRequest(p1,p2)
     myRequest.send();
   };
 
-
 function initMap() {
         var myLatLng = {lat: 30.3566420, lng: 76.3704814};
         var dest = {lat: 30.3532994, lng: 76.3619734};
-
-        var map = new google.maps.Map(document.getElementById('map'), {
-          center: myLatLng,
-          zoom: 12,
-          styles: [
+        var s=[
             {elementType: 'geometry', stylers: [{color: '#242f3e'}]},
             {elementType: 'labels.text.stroke', stylers: [{color: '#242f3e'}]},
             {elementType: 'labels.text.fill', stylers: [{color: '#746855'}]},
@@ -107,7 +178,12 @@ function initMap() {
               elementType: 'labels.text.stroke',
               stylers: [{color: '#17263c'}]
             }
-          ]
+          ];
+
+        var map = new google.maps.Map(document.getElementById('map'), {
+          center: myLatLng,
+          zoom: 18,
+          styles: s
         });
         var directionsDisplay;
         var directionsService
@@ -126,7 +202,7 @@ function initMap() {
             var request = {
               destination: dest,
               origin: new google.maps.LatLng(myLatLng.lat,myLatLng.lng),
-              travelMode: 'WALKING'
+              travelMode: 'TRANSIT'
             };
             
             // Pass the directions request to the directions service.
@@ -143,12 +219,26 @@ function initMap() {
 		    map: map,
 		    title: 'Hello World!'
 		});
+    var marker2 = new google.maps.Marker({
+            position: myLatLng, 
+            map: map
+        });
+    google.maps.event.addListener(map, 'click', function(event) {
+       placeMarker(event.latLng);
+    });
+
+    function placeMarker(location) {
+        marker2.setPosition(location);
+        document.querySelector("input.lat").value=location.lat();
+        document.querySelector("input.lon").value=location.lng();
+    }
     marker.setIcon('http://maps.google.com/mapfiles/ms/icons/green-dot.png')
-    var socket = io.connect('http://localhost');
+    var socket = io.connect('http://localhost:8080');
           socket.on('news', function (data) {
             myLatLng=JSON.parse(data);
             var latlng = new google.maps.LatLng(myLatLng.lat,myLatLng.lng);
             marker.setPosition(myLatLng);
+            map.setCenter(myLatLng)
             // console.log(myLatLng)
             socket.emit('my other event', { my: 'data' });
       });
@@ -157,16 +247,29 @@ function initMap() {
 
 var b1=document.querySelector("button#loc");
 var b2=document.querySelector("button#sur");
+var b3 = document.querySelector('button#alert');
 
 b1.addEventListener("click",function()
   {
       document.querySelector("div.location").classList.remove("hide");
       document.querySelector("div.Photo").classList.add("hide");
+      document.querySelector("div.Alert").classList.add('hide');
   });
 
 b2.addEventListener("click",function()
   {
       document.querySelector("div.location").classList.add("hide");
       document.querySelector("div.Photo").classList.remove("hide");
+      document.querySelector('div.Alert').classList.add('hide')
   });
+
+b3.addEventListener("click",function()
+  {
+      document.querySelector("div.location").classList.add("hide");
+      document.querySelector("div.Photo").classList.add("hide");
+      document.querySelector('div.Alert').classList.remove('hide')
+      allAlerts();
+  });
+
+
       
