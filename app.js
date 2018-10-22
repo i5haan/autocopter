@@ -1,14 +1,15 @@
-var express = require('express');
-var app=express();
-var mongoose = require('mongoose')
-var Photo = require('./models/Photo')
-mongoose.connect('mongodb://localhost/ped')
+const express = require('express');
+const app=express();
+const mongoose = require('mongoose')
+const Photo = require('./models/Photo')
+mongoose.connect('mongodb://localhost/ped', { useNewUrlParser: true })
 // var server = require('http').Server(app);
 var currCoordinate = {lat : 0, lng : 0};
 
 var SerialPort = require("serialport")
 var bodyParser=require("body-parser");
 var fs = require('fs');
+var clientSocket;
 
 // var fileUpload = require("express-fileupload");
 app.set("view engine","ejs");
@@ -66,36 +67,53 @@ app.post('/upload', function(req, res) {
 	console.log(req.body)
 });
 
-port="COM3";
-
-var server=app.listen(8080);
-var io = require('socket.io')(server);
-
-const Readline = SerialPort.parsers.Readline;
-const parser = new Readline();
-
-var serialport = new SerialPort(port,{
-							baudRate:9600
-						});
-
-
-
-serialport.pipe(parser);
-
-io.on('connection', function (socket) {
-	parser.on("data",function(data)
-	{
-		currCoordinate = JSON.parse(data);
-		console.log(currCoordinate)
-		socket.emit('news',data);
-	});
-  	
-  	socket.on('message', function (data) {
-    console.log(data);
-  });
+app.post('/currcoord', function(req, res) {
+	console.log(req.body);
+	res.send("hit!!");
 });
 
-serialport.on("open",function()
-	{
-		console.log("Serial port is a open")
+port="COM3";
+
+var server=app.listen(3000);
+var io = require('socket.io')(server);
+
+// const Readline = SerialPort.parsers.Readline;
+// const parser = new Readline();
+
+// var serialport = new SerialPort(port,{
+// 							baudRate:9600
+// 						});
+// 
+// 
+// 
+// serialport.pipe(parser);
+var coordNamespace = io.of('/coordapp');
+coordNamespace.on('connection', function(socket){
+	console.log('Phone client was connected made!');
+	socket.on('coord', function(data){
+		console.log(data);
+		if(clientSocket) {
+			clientSocket.emit('news', JSON.stringify(data));
+		}else{
+			console.log('The Client is not connected');
+		}
 	});
+	socket.on('disconnect', function(){
+		console.log('Phone Client was disconnected!');
+	})
+});
+
+var clientNamespace = io.of('/client');
+clientNamespace.on('connection', function (socket) {
+  	console.log('Client was connected!');
+  	clientSocket = socket;
+  	socket.on('disconnect', function(){
+  		clientSocket = null;
+  		console.log('Client Was dissconnected')
+  	});
+});
+
+// serialport.on("open",function()
+// 	{
+// 		console.log("Serial port is a open")
+// 	});

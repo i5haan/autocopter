@@ -233,13 +233,14 @@ function initMap() {
         document.querySelector("input.lon").value=location.lng();
     }
     marker.setIcon('http://maps.google.com/mapfiles/ms/icons/green-dot.png')
-    var socket = io.connect('http://localhost:8080');
+    var socket = io.connect('http://localhost:3000/client');
           socket.on('news', function (data) {
+            console.log(data);
             myLatLng=JSON.parse(data);
             var latlng = new google.maps.LatLng(myLatLng.lat,myLatLng.lng);
             marker.setPosition(myLatLng);
             map.setCenter(myLatLng)
-            // console.log(myLatLng)
+            console.log(myLatLng)
             socket.emit('my other event', { my: 'data' });
       });
 }
