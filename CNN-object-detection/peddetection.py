@@ -16,7 +16,7 @@ import urllib.request as urll
 import time
 from urllib.parse import urlencode
 
-url='http://10.211.45.206:8080/shot.jpg'
+url='http://192.168.43.103:8080/shot.jpg'
 
 max_person = 2
  

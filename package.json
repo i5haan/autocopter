@@ -9,10 +9,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "aws-sdk": "^2.348.0",
     "body-parser": "^1.18.3",
     "ejs": "^2.6.1",
     "express": "^4.16.3",
     "express-fileupload": "^1.0.0-alpha.1",
+    "jpeg-js": "^0.3.4",
     "mongoose": "^5.3.2",
     "request": "^2.87.0",
     "serialport": "^6.2.0",

@@ -10,6 +10,7 @@ var SerialPort = require("serialport")
 var bodyParser=require("body-parser");
 var fs = require('fs');
 var clientSocket;
+var jpeg = require('jpeg-js');
 
 // var fileUpload = require("express-fileupload");
 app.set("view engine","ejs");
@@ -20,10 +21,12 @@ app.use(bodyParser.urlencoded({extended:true, limit: '50mb'}));
 app.get('/', function (req, res) {
   res.render('map.ejs');
 });
+
 app.get('/distance',function(req,res)
 {
 	res.send("still a work in progress");
 })
+
 app.get('/alerts/checked', function(req, res) {
 	Photo.find({checked : "No"}, function(err, photos) {
 		if(err){
@@ -48,7 +51,9 @@ app.get('/mark/:id', function(req, res) {
 		}
 	});
 });
+
 app.post('/upload', function(req, res) {
+	console.log('hit')
 	var newRec = {
 		file_name : req.body.image,
 		checked : "No",
@@ -101,6 +106,12 @@ coordNamespace.on('connection', function(socket){
 	socket.on('disconnect', function(){
 		console.log('Phone Client was disconnected!');
 	})
+	socket.on('image', function(data) {
+		// data.string = data.image.toString();
+		// console.log(data);
+		require('fs').writeFile('/image/2.jpg', data.image, console.log)
+	});
+
 });
 
 var clientNamespace = io.of('/client');
@@ -112,6 +123,14 @@ clientNamespace.on('connection', function (socket) {
   		console.log('Client Was dissconnected')
   	});
 });
+
+// var imageNamespace = io.of('/img');
+// imageNamespace.on('connection', function(socket) {
+// 	console.log('Phone image client Connected');
+// 	socket.on('image', function(data){
+// 		console.log(data.image);
+// 	})
+// });
 
 // serialport.on("open",function()
 // 	{
