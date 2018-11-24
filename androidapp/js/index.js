@@ -1,13 +1,26 @@
 var port = "3000";
-var hostname = '192.168.43.170';
+var hostname = 'localhost';
 var pqdn = 'http://' + hostname + ':' + port;
+var streamURI = 'http://192.168.1.4:8080/shot.jpg';
 var currCoord = {
 	lat : 0,
 	lng :0
 }
 var x = document.getElementById("demo");
 console.log(pqdn+'/coordapp')
-const socket = io(pqdn + '/coordapp');
+const coordNps = io(pqdn + '/coordapp');
+const imgNps = io(pqdn + '/img');
+
+function getCamera(){
+	var video = document.querySelector('.camera-video');
+	console.log(video);
+	if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+	 navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
+	 video.src = window.URL.createObjectURL(stream);
+	 video.play();
+	 });
+	}
+}
 
 function getLocation() {
     if (navigator.geolocation) {
@@ -33,7 +46,7 @@ function showPosition(position) {
     console.log(data)
 
     // Sending Coordinates to Server
-    socket.emit('coord', currCoord);
+    coordNps.emit('coord', currCoord);
  //    $.ajax({
 	// 		url : pqdn + '/currcoord',
 	// 		type : "POST",
@@ -44,7 +57,51 @@ function showPosition(position) {
 	// });
 }
 
+function sendPhoto(){
+    // $.ajax({
+    //     type: "GET",
+    //     url: 'https://picsum.photos/200/200/?image=111',
+    //     contenType: 'image/jpeg',
+    //     success: function(img) {
+    //         var sendData = {};
+    //         sendData.image = img;
+    //         sendData.coord = currCoord;
+    //         console.log(sendData.image);
+    //         // coordNps.emit('image', sendData);
+    //     },
+    //     error: function(error, txtStatus) {
+    //       console.log(txtStatus);
+    //       console.log('error');
+    //     }
+    //   });
+    var myRequest = new XMLHttpRequest();
+    console.log("hi")
+    // 2. open the request and pass the HTTP method name and the resource as parameters
+    myRequest.open('GET', 'https://picsum.photos/200/200/?image=111', true);
+    // 3. write a function that runs anytime the state of the AJAX request changes
+    myRequest.responseType = 'arraybuffer';
+    myRequest.onload = function () 
+    { 
+        // 4. check if the request has a readyState of 4, which indicates the server has responded (complete)
+        if (myRequest.readyState === 4) 
+        {
+            console.log(myRequest.statusCode)
+            var data = "";
+            // 5. insert the text sent by the server into the HTML of the 'ajax-content'
+            var sendData = {};
+            sendData.image = myRequest.response;
+            sendData.coord = currCoord;
+            console.log(sendData.image);
+            coordNps.emit('image', sendData);
+            
+            
+        }
+    };
+    myRequest.send();
+}
+
 
 console.log(pqdn + '/currcoord');
 
-setInterval(getLocation, 1000);
+// setInterval(getLocation, 1000);
+// setInterval(sendPhoto, 1000);
